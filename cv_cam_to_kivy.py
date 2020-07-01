@@ -3,6 +3,7 @@ from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
 from kivy.graphics.texture import Texture
+from kivy.properties import ObjectProperty
 
 import time
 import cv2 
@@ -11,15 +12,6 @@ import cv2
 Builder.load_string('''
 <MultipleCameras>:
     orientation: 'horizontal'
-    CameraClick:
-        id: cam0
-        index: 0
-    CameraClick:
-        id: cam1
-        index: 0
-    CameraClick:
-        id: cam2
-        index: 0
 
 <CameraClick>:
     orientation: 'vertical'
@@ -44,6 +36,7 @@ class CameraClick(BoxLayout):
     is_playing = False
     video_cap = None
     video_interval = None
+    index = ObjectProperty(None)
 
     def build(self):
         pass
@@ -96,11 +89,21 @@ class CameraClick(BoxLayout):
         camera.export_to_png("IMG_{}.png".format(timestr))
         print("Captured")
 
+def discover_cameras():
+    '''
+    do the logic of discovering cameras
+    return: list of camera indices
+    '''
+    return range(0,3)
+
 class MultipleCameras(BoxLayout):
     def start_all(self):
-        ids = ["cam0", "cam1", "cam2"]
-        for cam in ids:
-            self.ids[cam].start_interval()
+        ids = discover_cameras()
+
+        for cam_index in ids:
+            widget = CameraClick(index=cam_index)
+            widget.start_interval()
+            self.add_widget(widget)
 
 
 class TestCamera(App):
